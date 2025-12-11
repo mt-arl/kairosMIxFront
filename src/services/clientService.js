@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api/clients';
+const API_URL = 'https://kairos-mixback.vercel.app/api/clients';
 
 /**
  * Crear un nuevo cliente

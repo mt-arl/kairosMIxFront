@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api/products';
+const API_URL = 'https://kairos-mixback.vercel.app/api/products';
 
 const handleResponse = async (response, errorMessage) => {
     if (!response.ok) throw new Error(errorMessage);
