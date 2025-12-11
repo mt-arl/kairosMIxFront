@@ -73,7 +73,7 @@ const ProductForm = ({ onCancel, onSuccess }) => {
                 initialStock: parseInt(formData.initialStock)
             };
 
-            const response = await fetch('http://localhost:3000/api/products', {
+            const response = await fetch('https://kairos-mixback.vercel.app/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
