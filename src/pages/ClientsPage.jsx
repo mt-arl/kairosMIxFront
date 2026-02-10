@@ -1,18 +1,21 @@
-import { useState, useEffect } from 'react';
-import ClientModal from '../components/ClientModal';
-import ClientSearch from '../components/ClientSearch';
-import ClientTable from '../components/ClientTable';
-import { deactivateClient } from '../services/clientService';
+import { useState } from 'react';
+import AdminSearch from '../components/admin/AdminSearch';
+import AdminTable from '../components/admin/AdminTable';
+import ClientModal from '../components/clientes/ClientModal';
+import { getClients, deactivateClient } from '../services/clientService';
+
+// Configuración de columnas para la tabla de clientes
+const clientColumns = [
+    { key: 'cedula', label: 'Identificación', type: 'code' },
+    { key: 'nombre', label: 'Nombre', className: 'font-semibold' },
+    { key: 'correo', label: 'Correo', type: 'email' },
+    { key: 'telefono', label: 'Teléfono' },
+    { key: 'direccion', label: 'Dirección', className: 'max-w-48 truncate' }
+];
 
 export default function ClientsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
-
-    useEffect(() => {
-        if (window.lucide) {
-            setTimeout(() => window.lucide.createIcons(), 0);
-        }
-    }, [searchResults]);
 
     const showAlert = (icon, title, text) => {
         window.Swal.fire({
@@ -59,7 +62,7 @@ export default function ClientsPage() {
             `¿Está seguro que desea eliminar al cliente <strong>"${client.nombre}"</strong>?<br><br>Esta acción no se puede deshacer.`,
             'Sí, eliminar'
         );
-        
+
         if (!result.isConfirmed) return;
 
         try {
@@ -72,32 +75,50 @@ export default function ClientsPage() {
     };
 
     return (
-        <div className="page-container">
-            <div className="page-header">
-                <div className="page-title">
-                    <i data-lucide="users"></i>
+        <div className="p-6 md:p-8 max-w-7xl mx-auto">
+            {/* Page Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 flex items-center justify-center bg-linear-to-br from-amber-400 to-amber-600 rounded-2xl shadow-lg shadow-amber-500/30">
+                        <i className="fa-solid fa-users text-2xl text-white"></i>
+                    </div>
                     <div>
-                        <h1>Gestión de Clientes</h1>
-                        <p>Administra la base de clientes</p>
+                        <h1 className="text-2xl font-bold text-slate-800">Gestión de Clientes</h1>
+                        <p className="text-sm text-slate-500">Administra la base de clientes</p>
                     </div>
                 </div>
-                <button onClick={handleNewClient} className="btn-primary">
-                    <i data-lucide="user-plus"></i>
+                <button
+                    onClick={handleNewClient}
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-linear-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-xl transition-all duration-300 hover:from-amber-600 hover:to-amber-700 hover:shadow-lg hover:shadow-amber-500/30 hover:-translate-y-0.5"
+                >
+                    <i className="fa-solid fa-user-plus text-lg"></i>
                     Nuevo Cliente
                 </button>
             </div>
 
-            <div className="page-content">
-                <ClientSearch onSearch={handleSearchResults} />
-                
+            {/* Page Content */}
+            <div className="space-y-6">
+                <AdminSearch
+                    color="amber"
+                    title="Buscar Clientess"
+                    subtitle="Busque por nombre, identificación, correo o teléfono"
+                    placeholder="Ingrese nombre, cédula, correo o teléfono..."
+                    onSearch={handleSearchResults}
+                    getAllService={getClients}
+                />
+
                 {searchResults.length > 0 && (
-                    <ClientTable 
-                        clients={searchResults}
+                    <AdminTable
+                        data={searchResults}
+                        columns={clientColumns}
                         onDelete={handleDelete}
+                        color="amber"
+                        emptyMessage="No hay clientes para mostrar"
+                        emptySubMessage="Registre un nuevo cliente o realice una búsqueda diferente"
                     />
                 )}
 
-                <ClientModal 
+                <ClientModal
                     isOpen={isModalOpen}
                     onClose={handleCloseModal}
                     onSuccess={handleFormSuccess}
