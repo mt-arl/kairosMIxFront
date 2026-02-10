@@ -1,4 +1,4 @@
-const API_URL = 'https://kairos-mixback.vercel.app/api';
+const API_URL = 'https://kairozmixbk.vercel.app/api';
 
 /**
  * Registrar un nuevo cliente

@@ -1,4 +1,4 @@
-const API_URL = 'https://kairos-mixback.vercel.app/api';
+const API_URL = 'https://kairozmixbk.vercel.app/api';
 
 // Obtener token del cliente
 const getToken = () => {

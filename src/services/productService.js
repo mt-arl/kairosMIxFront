@@ -1,4 +1,4 @@
-const API_URL = 'https://kairos-mixback.vercel.app/api/products';
+const API_URL = 'https://kairozmixbk.vercel.app/api/products';
 
 const getHeaders = () => {
     const token = localStorage.getItem('clientToken');
