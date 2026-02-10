@@ -144,9 +144,11 @@ function CatalogPage({ onLogout }) {
     const handleConfirmOrder = async (orderItems) => {
         setIsCreatingOrder(true);
         try {
+            // Enviar productos con indicador de que son por LIBRAS (mezcla)
             const items = orderItems.map(item => ({
                 productId: item._id,
-                quantity: item.quantityLbs
+                quantity: item.quantityLbs,
+                unit: 'lbs'  // Indicar que es compra por libras (mezcla)
             }));
 
             console.log('Items enviados al backend:', items);
