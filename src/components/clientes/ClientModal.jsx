@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { createClient } from '../../services/clientService';
+import { createClient, updateClient } from '../../services/clientService';
 
-export default function ClientModal({ isOpen, onClose, onSuccess }) {
+export default function ClientModal({ isOpen, onClose, onSuccess, clientToEdit }) {
     const initialFormState = {
         cedula: '',
         nombre: '',
@@ -14,12 +14,23 @@ export default function ClientModal({ isOpen, onClose, onSuccess }) {
     const [formData, setFormData] = useState(initialFormState);
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const isEditing = !!clientToEdit;
 
     useEffect(() => {
-        if (!isOpen) {
+        if (isOpen && clientToEdit) {
+            // Pre-fill form with client data when editing
+            setFormData({
+                cedula: clientToEdit.cedula || '',
+                nombre: clientToEdit.nombre || '',
+                correo: clientToEdit.correo || '',
+                telefono: clientToEdit.telefono || '',
+                direccion: clientToEdit.direccion || '',
+                password: '' // Password is not pre-filled for security
+            });
+        } else if (!isOpen) {
             resetForm();
         }
-    }, [isOpen]);
+    }, [isOpen, clientToEdit]);
 
     const resetForm = () => {
         setFormData(initialFormState);
@@ -72,10 +83,18 @@ export default function ClientModal({ isOpen, onClose, onSuccess }) {
             newErrors.direccion = 'La dirección es requerida';
         }
 
-        if (!formData.password || !formData.password.trim()) {
-            newErrors.password = 'La contraseña es requerida';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+        // Password is only required when creating a new client
+        if (!isEditing) {
+            if (!formData.password || !formData.password.trim()) {
+                newErrors.password = 'La contraseña es requerida';
+            } else if (formData.password.length < 6) {
+                newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+            }
+        } else {
+            // When editing, password is optional but must be valid if provided
+            if (formData.password && formData.password.length < 6) {
+                newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
+            }
         }
 
         setErrors(newErrors);
@@ -90,15 +109,40 @@ export default function ClientModal({ isOpen, onClose, onSuccess }) {
         setLoading(true);
 
         try {
-            await createClient(formData);
+            if (isEditing) {
+                // Update existing client
+                const updateData = {
+                    nombre: formData.nombre,
+                    correo: formData.correo,
+                    telefono: formData.telefono,
+                    direccion: formData.direccion
+                };
+                // Only include password if it was changed
+                if (formData.password && formData.password.trim()) {
+                    updateData.password = formData.password;
+                }
 
-            await window.Swal.fire({
-                icon: 'success',
-                title: '¡Registrado!',
-                text: 'Cliente registrado exitosamente',
-                confirmButtonColor: '#10b981',
-                timer: 2000
-            });
+                await updateClient(clientToEdit._id, updateData);
+
+                await window.Swal.fire({
+                    icon: 'success',
+                    title: '¡Actualizado!',
+                    text: 'Cliente actualizado exitosamente',
+                    confirmButtonColor: '#10b981',
+                    timer: 2000
+                });
+            } else {
+                // Create new client
+                await createClient(formData);
+
+                await window.Swal.fire({
+                    icon: 'success',
+                    title: '¡Registrado!',
+                    text: 'Cliente registrado exitosamente',
+                    confirmButtonColor: '#10b981',
+                    timer: 2000
+                });
+            }
 
             resetForm();
             onSuccess();
@@ -131,8 +175,8 @@ export default function ClientModal({ isOpen, onClose, onSuccess }) {
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 bg-linear-to-r from-amber-500 to-amber-600 border-b-[3px] border-amber-700">
                     <h2 className="flex items-center gap-3 text-white text-xl font-bold">
-                        <i className="fa-solid fa-user-plus text-xl"></i>
-                        Registrar Cliente
+                        <i className={`fa-solid ${isEditing ? 'fa-user-edit' : 'fa-user-plus'} text-xl`}></i>
+                        {isEditing ? 'Editar Cliente' : 'Registrar Cliente'}
                     </h2>
                     <button
                         className="flex items-center justify-center w-8 h-8 bg-white/20 rounded-lg transition-all duration-200 hover:bg-white/30 hover:scale-110"
@@ -158,6 +202,7 @@ export default function ClientModal({ isOpen, onClose, onSuccess }) {
                             className={inputClasses(errors.cedula)}
                             placeholder="Ingrese el número de identificación"
                             maxLength="13"
+                            disabled={isEditing}  // Cannot change cedula when editing
                         />
                         <span className="text-xs text-slate-500 italic mt-1 block">Cédula (10 dígitos), RUC (13 dígitos) o Pasaporte (6-9 caracteres)</span>
                         {errors.cedula && <span className="text-xs font-medium text-red-500 mt-1 block">{errors.cedula}</span>}
@@ -236,7 +281,7 @@ export default function ClientModal({ isOpen, onClose, onSuccess }) {
                     <div>
                         <label htmlFor="password" className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
                             <i className="fa-solid fa-lock text-amber-500"></i>
-                            Contraseña *
+                            Contraseña {isEditing ? '(opcional)' : '*'}
                         </label>
                         <input
                             type="password"
@@ -245,9 +290,11 @@ export default function ClientModal({ isOpen, onClose, onSuccess }) {
                             value={formData.password}
                             onChange={handleChange}
                             className={inputClasses(errors.password)}
-                            placeholder="Mínimo 6 caracteres"
+                            placeholder={isEditing ? 'Dejar en blanco para no cambiar' : 'Mínimo 6 caracteres'}
                         />
-                        <span className="text-xs text-slate-500 italic mt-1 block">Será usada para que el cliente inicie sesión</span>
+                        <span className="text-xs text-slate-500 italic mt-1 block">
+                            {isEditing ? 'Solo ingrese una nueva contraseña si desea cambiarla' : 'Será usada para que el cliente inicie sesión'}
+                        </span>
                         {errors.password && <span className="text-xs font-medium text-red-500 mt-1 block">{errors.password}</span>}
                     </div>
 
@@ -267,7 +314,7 @@ export default function ClientModal({ isOpen, onClose, onSuccess }) {
                             disabled={loading}
                         >
                             <i className="fa-solid fa-check"></i>
-                            {loading ? 'Registrando...' : 'Registrar'}
+                            {loading ? (isEditing ? 'Actualizando...' : 'Registrando...') : (isEditing ? 'Actualizar' : 'Registrar')}
                         </button>
                     </div>
                 </form>

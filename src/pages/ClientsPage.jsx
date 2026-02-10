@@ -16,6 +16,7 @@ const clientColumns = [
 export default function ClientsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
+    const [clientToEdit, setClientToEdit] = useState(null);
 
     const showAlert = (icon, title, text) => {
         window.Swal.fire({
@@ -41,6 +42,7 @@ export default function ClientsPage() {
 
     const handleFormSuccess = () => {
         setIsModalOpen(false);
+        setClientToEdit(null);
         setSearchResults([]);
     };
 
@@ -49,11 +51,18 @@ export default function ClientsPage() {
     };
 
     const handleNewClient = () => {
+        setClientToEdit(null);
+        setIsModalOpen(true);
+    };
+
+    const handleEdit = (client) => {
+        setClientToEdit(client);
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
+        setClientToEdit(null);
     };
 
     const handleDelete = async (client) => {
@@ -111,6 +120,7 @@ export default function ClientsPage() {
                     <AdminTable
                         data={searchResults}
                         columns={clientColumns}
+                        onEdit={handleEdit}
                         onDelete={handleDelete}
                         color="amber"
                         emptyMessage="No hay clientes para mostrar"
@@ -122,6 +132,7 @@ export default function ClientsPage() {
                     isOpen={isModalOpen}
                     onClose={handleCloseModal}
                     onSuccess={handleFormSuccess}
+                    clientToEdit={clientToEdit}
                 />
             </div>
         </div>
