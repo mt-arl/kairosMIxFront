@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api/clients';
+const API_URL = 'https://kairos-mixback.vercel.app/api/clients';
 
 /**
  * Crear un nuevo cliente
@@ -14,13 +14,13 @@ export const createClient = async (clientData) => {
       },
       body: JSON.stringify(clientData),
     });
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.message || 'Error al registrar cliente');
     }
-    
+
     return data;
   } catch (error) {
     throw error;
@@ -34,11 +34,11 @@ export const createClient = async (clientData) => {
 export const getClients = async () => {
   try {
     const response = await fetch(API_URL);
-    
+
     if (!response.ok) {
       throw new Error('Error al obtener clientes');
     }
-    
+
     return await response.json();
   } catch (error) {
     throw error;
@@ -53,12 +53,12 @@ export const getClients = async () => {
 export const getClientById = async (id) => {
   try {
     const response = await fetch(`${API_URL}/${id}`);
-    
+
     if (!response.ok) {
       const data = await response.json();
       throw new Error(data.message || 'Cliente no encontrado');
     }
-    
+
     return await response.json();
   } catch (error) {
     throw error;
@@ -80,13 +80,13 @@ export const updateClient = async (id, clientData) => {
       },
       body: JSON.stringify(clientData),
     });
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.message || 'Error al actualizar cliente');
     }
-    
+
     return data;
   } catch (error) {
     throw error;
@@ -103,13 +103,13 @@ export const deactivateClient = async (id) => {
     const response = await fetch(`${API_URL}/${id}/deactivate`, {
       method: 'PATCH',
     });
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.message || 'Error al desactivar cliente');
     }
-    
+
     return data;
   } catch (error) {
     throw error;
